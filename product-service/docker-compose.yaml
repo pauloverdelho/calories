@@ -1,0 +1,35 @@
+version: '3.1'
+services:
+  mysqldb:
+    container_name: mysqldb
+    image: mysql:5.7
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQLDB_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQLDB_DATABASE
+    ports:
+      - $MYSQLDB_LOCAL_PORT:$MYSQLDB_DOCKER_PORT
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 6s
+      retries: 10
+  product-service:
+    container_name: product-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/$MYSQLDB_DATABASE
+      SPRING_DATASOURCE_USERNAME: $MYSQLDB_USER
+      SPRING_DATASOURCE_PASSWORD: $MYSQLDB_ROOT_PASSWORD
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+volumes:
+  db:
