@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @RestController
 @RequestMapping("/products")
@@ -16,11 +17,11 @@ public class ProductController {
 
     private final ProductRepository productRepository;
 
-    @GetMapping("/{barcode}")
+    @GetMapping("/{id}")
     public Optional<Product> getProduct(
-            @PathVariable Long barcode) {
+            @PathVariable Long id) {
 
-        return productRepository.findByBarcode(barcode);
+        return productRepository.findById(id);
     }
 
     @GetMapping()
@@ -31,22 +32,18 @@ public class ProductController {
 
     @PostMapping
     public Product addProduct(@RequestBody @Valid Product product) {
-        Product toSave = productRepository.findByBarcode(product.getBarcode())
-                .map(saved -> updateProduct(saved, product))
-                .orElse(product);
+        //if product being added has invalid id, clear id and add product
+        if (product.getId() != null && getProduct(product.getId()).isEmpty()) {
+            product.setId(null);
+        }
 
-        return productRepository.save(toSave);
+        return productRepository.save(product);
     }
 
-    @DeleteMapping("/{barcode}")
+    @DeleteMapping("/{id}")
     public void removeProduct(
-            @PathVariable Long barcode) {
+            @PathVariable Long id) {
 
-        productRepository.findByBarcode(barcode).ifPresent(productRepository::delete);
-    }
-
-    private Product updateProduct(Product saved, Product product) {
-        saved.setCalories(product.getCalories());
-        return saved;
+        productRepository.deleteById(id);
     }
 }
