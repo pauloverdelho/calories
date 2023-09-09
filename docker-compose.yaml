@@ -20,7 +20,19 @@ services:
     container_name: product-service
     build: ./product-service
     ports:
-      - 8080:8080
+      - "8080:8080"
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/$MYSQLDB_DATABASE
+      SPRING_DATASOURCE_USERNAME: $MYSQLDB_USER
+      SPRING_DATASOURCE_PASSWORD: $MYSQLDB_ROOT_PASSWORD
+  order-service:
+    container_name: order-service
+    build: ./order-service
+    ports:
+      - "8081:8080"
     depends_on:
       mysqldb:
         condition: service_healthy
