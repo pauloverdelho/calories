@@ -40,3 +40,10 @@ and the order service on
 To stop all services in the end just run the command on the terminal
 
 #### docker compose down
+
+
+## Considerations
+
+- Ideally some database mechanisms like auditing and soft delete should be implemented, but there was not enough time.
+- Also, due to the time constraints, the order service only implements a snapshot like record, instead of a full record.
+- On a real life scenario I would have many questions about the requirements needing answer before going ahead with the implementation.
