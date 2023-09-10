@@ -13,5 +13,6 @@
 	<modules>
 		<module>product-service</module>
 		<module>order-service</module>
+		<module>calorie-counter</module>
 	</modules>
 </project>
