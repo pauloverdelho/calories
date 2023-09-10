@@ -24,9 +24,12 @@ public class OrderController {
     }
 
     @GetMapping()
-    public List<Order> listUserOrders(
-            @RequestParam String user) {
+    public List<Order> listOrders(
+            @RequestParam(required = false) String user) {
 
+        if (user == null) {
+            return orderRepository.findAll();
+        }
         return orderRepository.findAllByUser(user);
     }
 

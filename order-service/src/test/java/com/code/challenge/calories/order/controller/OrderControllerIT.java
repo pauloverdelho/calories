@@ -36,7 +36,8 @@ public class OrderControllerIT {
             .withUsername("test")
             .withPassword("test")
             .waitingFor(Wait.forListeningPort())
-            .withEnv("MYSQL_ROOT_HOST", "%");
+            .withEnv("MYSQL_ROOT_HOST", "%")
+            .withPrivilegedMode(true);
 
     @LocalServerPort
     private int port;
@@ -118,41 +119,51 @@ public class OrderControllerIT {
 
     @Test
     @org.junit.jupiter.api.Order(7)
-    public void testRetrieveOrders() {
+    public void testRetrieveUserOrders() {
 
-        List<Order> response = getTestOrders();
+        List<Order> response = getTestOrders(TEST_USER);
         assertThat(response).isNotNull();
         assertThat(response.size()).isEqualTo(3);
     }
 
     @Test
     @org.junit.jupiter.api.Order(8)
+    public void testRetrieveOrders() {
+
+        List<Order> response = getTestOrders(null);
+        assertThat(response).isNotNull();
+        assertThat(response.size()).isEqualTo(3);
+    }
+
+    @Test
+    @org.junit.jupiter.api.Order(9)
     public void testDeleteAll() {
 
         restTemplate.delete("http://localhost:" + port + "/orders/1");
 
-        List<Order> response = getTestOrders();
+        List<Order> response = getTestOrders(null);
         assertThat(response).isNotNull();
         assertThat(response.size()).isEqualTo(2);
 
         restTemplate.delete("http://localhost:" + port + "/orders/2");
 
-        response = getTestOrders();
+        response = getTestOrders(null);
         assertThat(response).isNotNull();
         assertThat(response.size()).isEqualTo(1);
 
         restTemplate.delete("http://localhost:" + port + "/orders/3");
 
-        response = getTestOrders();
+        response = getTestOrders(null);
         assertThat(response).isNotNull();
         assertThat(response).isEmpty();
     }
 
-    private List<Order> getTestOrders() {
-        String urlTemplate = UriComponentsBuilder.fromHttpUrl("http://localhost:" + port + "/orders")
-                .queryParam("user", TEST_USER)
-                .encode()
-                .toUriString();
+    private List<Order> getTestOrders(String user) {
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl("http://localhost:" + port + "/orders");
+        if (user != null) {
+            uriComponentsBuilder = uriComponentsBuilder.queryParam("user", user);
+        }
+        String urlTemplate = uriComponentsBuilder.encode().toUriString();
 
         return restTemplate.exchange(urlTemplate, HttpMethod.GET, null, ORDER_LIST_TYPE).getBody();
     }

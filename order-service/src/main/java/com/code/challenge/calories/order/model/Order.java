@@ -32,5 +32,5 @@ public class Order {
     private String beverage;
 
     @Positive
-    private long calories;
+    private int calories;
 }
