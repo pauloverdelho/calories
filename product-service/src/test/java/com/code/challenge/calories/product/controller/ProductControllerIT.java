@@ -2,6 +2,7 @@ package com.code.challenge.calories.product.controller;
 
 import com.code.challenge.calories.product.model.Product;
 import com.code.challenge.calories.product.model.ProductType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -37,7 +39,8 @@ public class ProductControllerIT {
             .withUsername("test")
             .withPassword("test")
             .waitingFor(Wait.forListeningPort())
-            .withEnv("MYSQL_ROOT_HOST", "%");
+            .withEnv("MYSQL_ROOT_HOST", "%")
+            .withPrivilegedMode(true);
 
     @LocalServerPort
     private int port;
@@ -56,6 +59,9 @@ public class ProductControllerIT {
     @Test
     @org.junit.jupiter.api.Order(1)
     public void testRetrieveOrderNotExist() {
+        log.info("Is created? {}", mySQLContainer.isCreated());
+        log.info("Is running? {}", mySQLContainer.isRunning());
+        log.info("Is healthy? {}", mySQLContainer.isHealthy());
 
         Product response = restTemplate.getForObject("http://localhost:" + port + "/products/1", Product.class);
         assertThat(response).isNull();
